@@ -20,10 +20,15 @@ fn main() {
         .finalize();
 
     let mut generation_counter = 0;
-    loop {
     let mut image_index = 0;
     let mut batch_buff: Vec<Vec<f64>> = Vec::new();
     let mut label_buff: Vec<Vec<f64>> = Vec::new();
+    
+    let mut image_index_test = 0;
+    let mut batch_buff_test: Vec<Vec<f64>> = Vec::new();
+    let mut label_buff_test: Vec<Vec<f64>> = Vec::new();
+    
+    loop {
 
 for i in 0..10 {
     // fetch batch
@@ -41,11 +46,8 @@ for i in 0..10 {
     }
     network.train(&batch_buff, &label_buff);
 }
-    network.learning_rate = network.learning_rate / 1.5;
+    network.learning_rate = network.learning_rate / 1.2;
 
-    let mut image_index_test = 0;
-    let mut batch_buff_test: Vec<Vec<f64>> = Vec::new();
-    let mut label_buff_test: Vec<Vec<f64>> = Vec::new();
 
     // fetch batch
     for image_index_test in image_index_test..1000 {
@@ -66,6 +68,11 @@ for i in 0..10 {
     generation_counter += 1;
     
     println!("Generation {}, Error rate: {}", (generation_counter), accurecy);
+
+    batch_buff.clear();
+    label_buff.clear();
+    batch_buff_test.clear();
+    label_buff_test.clear();
 };
 
 }
@@ -83,7 +90,7 @@ struct Neuron {
 }
 
 struct Network {
-    input_layer: [f64; 784], // kanske inte behövs, kan nog abstraheras bort -> input direkt in i 
+    // input_layer: [f64; 784], // kanske inte behövs, kan nog abstraheras bort -> input direkt in i 
     hidden_layer_one: Vec<Neuron>,
     // hidden_layer_two: [Neuron; 20],
     output_layer: Vec<Neuron>,
@@ -103,7 +110,7 @@ impl Network {
         };
 
         Network { 
-            input_layer: ([0.0; 784]), 
+            // input_layer: ([0.0; 784]), 
             hidden_layer_one: (hidden_layer_neuron_list), 
             output_layer: (output_layer_neuron_list),
             learning_rate: 1.0
@@ -136,7 +143,7 @@ impl Network {
             let (weight_hidden_matrix, bias_hidden_matrix) = self.get_weight_bias_matrix(hidden_layer_one);
             
             // Backwards propagation, step one
-            let gradient_output_correct = Array2::from_shape_vec((10,1),a_output_layer.iter().zip(correct_chunk.index(iter)).map(|(&x,&y)| (x - y) * x * (1.0 - x)).collect()).unwrap();
+            let gradient_output_correct = Array2::from_shape_vec((10,1),a_output_layer.iter().zip(correct_chunk[iter]).map(|(&x,y)| (x - y) * x * (1.0 - x)).collect()).unwrap();
 
             let hidden_row = Array2::from_shape_vec((1, a_hidden_layer_one.len()), a_hidden_layer_one.clone(),).unwrap();
 
@@ -247,7 +254,7 @@ impl Network {
     
 
     // Feedforward for a specific layer. Creates a vec where the first element is the first neuron...
-    fn feedforward(&mut self, inputs_list: &Vec<f64>, select_layer: layer) -> Vec<f64> {
+    fn feedforward(&self, inputs_list: &Vec<f64>, select_layer: layer) -> Vec<f64> {
         let mut output_list: Vec<f64> = Vec::new();
         let self_layer = match select_layer {
             hidden_layer_one => &self.hidden_layer_one,
@@ -301,12 +308,6 @@ fn sum_weights(inputs_list: &Vec<f64>, weights: &Vec<f64>, bias: &f64) -> f64 {
     let weight_sum: f64 = weighted_list.sum();
 
     weight_sum + bias
-}
-
-// takes in the output from the network and then calculates cost.
-fn error_matrix(output: &Vec<f64>, correct: &Vec<f64>) -> Array2<f64>  {
-    let cost = output.iter().zip(correct).map(|(x,y)|(x-y).powi(2));
-    Array2::from_shape_vec((10, 1), cost.collect()).unwrap()
 }
 
 fn argmax(value_list: &Vec<f64>) -> Option<usize> {
