@@ -143,7 +143,7 @@ impl Network {
             let (weight_hidden_matrix, bias_hidden_matrix) = self.get_weight_bias_matrix(hidden_layer_one);
             
             // Backwards propagation, step one
-            let gradient_output_correct = Array2::from_shape_vec((10,1),a_output_layer.iter().zip(correct_chunk[iter]).map(|(&x,y)| (x - y) * x * (1.0 - x)).collect()).unwrap();
+            let gradient_output_correct = Array2::from_shape_vec((10,1),a_output_layer.iter().zip(correct_chunk.iter().nth(iter).unwrap()).map(|(&x,y)| (x - y) * x * (1.0 - x)).collect()).unwrap();
 
             let hidden_row = Array2::from_shape_vec((1, a_hidden_layer_one.len()), a_hidden_layer_one.clone(),).unwrap();
 
