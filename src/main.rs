@@ -20,6 +20,7 @@ fn main() {
         .finalize();
 
     let mut generation_counter = 0;
+
     let mut image_index = 0;
     let mut batch_buff: Vec<Vec<f64>> = Vec::new();
     let mut label_buff: Vec<Vec<f64>> = Vec::new();
@@ -46,7 +47,7 @@ for i in 0..10 {
     }
     network.train(&batch_buff, &label_buff);
 }
-    network.learning_rate = network.learning_rate / 1.2;
+    network.learning_rate = network.learning_rate / 1.01;
 
 
     // fetch batch
